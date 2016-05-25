@@ -4,6 +4,6 @@
 ### 目录结构 ###
     documentKits
     |--maven
-	    `--maven.md
+    |    `--maven.md
     |--git
-	    `--git.md
+	 `--git.md
