@@ -2,8 +2,8 @@
 各种技术的文档说明
 
 ### 目录结构 ###
-
-    maven
-        |-maven.md
-    git
-        |-git.md
+    documentKits
+    |--maven
+	    `--maven.md
+    |--git
+	    `--git.md
