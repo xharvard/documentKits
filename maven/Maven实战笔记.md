@@ -234,5 +234,205 @@ pom.xml添加junit模块,maven会自动到中央仓库(http://repo1.maven.org/ma
 
 
 
-## 第四章 背景案例 ##
+## 第四章 坐标和依赖 ##
+### 4.1 坐标 ###
+唯一标示maven中的构件。就跟平面坐标(x,y)唯一标示平面的一个点一样。
+
+坐标包括：groupId, artifactId, version, packaging, classifier
+
+### 4.2 坐标详解 ###
+
+    <groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.7</version>
+    <packaging>jar</packageing>
+    
+    groupId: 当前maven项目隶属的实际项目   - 必须
+    artifactId: 定义项目模块   - 必须
+    version: 项目当前版本    - 必须
+    packaging: 项目的打包方式   - 可选，默认为jar
+    classifier: 定义附属构件，如javadoc, 源代码等  - 不可直接定义，通过插件完成
+    最后查询的文件格式  artifactId-version.packaging  (junit-4.7.jar)
+
+### 4.3 依赖的配置 ###
+    <dependencies>
+	  <dependency>
+	    <groupId>...</groupId>
+	    <artifactId>...</artifactId>
+	    <version>...</version>
+        <type>...</type>
+	    <scope>...</scope>
+        <optional>..</optional>
+        <exclusions>
+          <exclusion>
+            ...
+          </exclusion>
+        </exclusions>
+        ...
+	  </dependency>
+      ...
+    </dependencies>
+
+dependencies下可以包含一个或多个dependency。
+每个dependency包含：
+
+- groupId: 坐标信息
+- artifactId: 坐标信息
+- version: 坐标信息
+- type: 依赖类型，对应于坐标的packaging。默认为jar
+- scope: 依赖范围 4.4详细描述
+- optional: 可选依赖范围 4.7详细描述
+- exclusions: 排除传递依赖性
+
+### 4.4 依赖范围 ###
+maven在编译，测试，运行时使用的classpath应该是不同的，所有scope就是针对这种情况设计的。
+
+比如，junit库在运行时是不需要的，但在测试时是需要的。
+
+Maven的几种依赖范围：
+
+- compile: 编译依赖范围，默认范围。对于编译，测试，运行三种classpath都有效。
+- test: 测试依赖范围，只对于测试classpath有效。 如junit。
+- provided: 已提供依赖范围，对于编译和测试classpath有效，运行无效。如servlet-api,编译，测试需要，运行时有容器提供，不需要maven重复引入。
+- runtime: 运行时依赖范围，对于测试和运行classpath有效，编译无效。如JDBC驱动实现，编译时只需jdk提供的接口即可，测试和运行时才需要具体实现驱动。
+- system: 系统依赖范围，与provided一致。只是该范围依赖是必须通过systemPath显示指定依赖文件的路径。不通过maven仓库解析，与本机系统绑定。谨慎使用。
+- import: 导入依赖范围，不会对三种classpath产生影响。
+
+### 4.5 传递依赖性 ###
+maven会自动管理包的依赖关系，比如spring-framework-2.5.6.jar包需要依赖commmos-logging.jar包，maven自动把依赖包commmos-logging.jar下载下来管理。而且依赖范围也可以传递过来。
+
+假设A依赖于B，B依赖于C，我们说A对于B是第一直接依赖，B对于C是第二直接依赖，A对于C是传递性依赖。
+
+### 4.6 依赖调解 ###
+假如A>B>C>X(1.0),，A>D>X(2.0)，X是A的传递性依赖，但是有2个版本的X,那么哪个版本会被maven解析呢？
+
+- 调解第一原则：路径最近者优先。即X(2.0)会被解析。如果路径相同，则第二原则。
+- 调解第二原则：POM中顺序靠前的优先。
+
+### 4.7 可选依赖 ###
+不推荐使用。
+
+    <optional>..</optional> 设置为true，即表示为可选依赖
+
+A>B，B>X(可选)，B>Y(可选)，这种情况X，Y将不会对A有影响。 A如果要使用X或者Y,得自己声明依赖。
+
+### 4.8 最佳实践 ###
+#### 4.8.1 排除依赖 ####
+某个依赖的jar包或者文件不想要，或者想换成其他的版本的配置。
+
+例如: A.jar依赖B.jar,B.jar依赖C-snap.jar。这个时候我觉得C-snap-2.0.jar不太稳定或者想换成其他同类型的包，可以如下配置：
+
+	<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	  <modelVersion>4.0.0</modelVersion>
+	  <groupId>com.mvn</groupId>
+	  <artifactId>hello-world</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	  <name>Maven hello world project</name>
+	  <dependencies>
+		<dependency>
+		  <groupId>junit</groupId>
+		  <artifactId>junit</artifactId>
+		  <exclusions>
+            <exclusion>
+              <groupId>C</groupId>
+	          <artifactId>C-snap</artifactId>
+            </exclusion>
+          </exclusions>
+		  <scope>test</scope>
+		</dependency>
+        <dependency>
+		  <groupId>C</groupId>
+		  <artifactId>C-snap</artifactId>
+          <version>3.0</version>
+		</dependency>
+      </dependencies>
+	</project>
+
+    注意：在exclusion里不用注明version，通过groupId和artifactId可以唯一确定坐标。
+
+
+> A ->  B -X> C(version ?)
+> 
+> |
+> 
+>    `  -> C(version: 3.0)
+
+
+#### 4.8.2 归类依赖 ####
+一些库的版本号可能是相同的，可以抽取出常量来控制。(**properties**里定义，如下**sp.version**)
+
+	<project xmlns="http://maven.apache.org/POM/4.0.0"
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	  http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	  <modelVersion>4.0.0</modelVersion>
+	  <groupId>com.mvn</groupId>
+	  <artifactId>hello-world</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	  <name>Maven hello world project</name>
+	  
+	  <properties>
+		<sp.version>2.5</sp.version>
+	  </properties>
+	  
+	  <dependencies>
+		<dependency>
+		  <groupId>org.sp</groupId>
+		  <artifactId>sp-core</artifactId>
+		  <version>${sp.version}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.sp</groupId>
+		  <artifactId>sp-beans</artifactId>
+		  <version>${sp.version}</version>
+		</dependency>
+	  </dependencies>
+	</project>
+
+#### 4.8.3 优化依赖 ####
+
+    mvn dependency:list 列出所有解析过的jar包
+    mvn dependency:tree 列出所有解析过的jar包树
+    mvn dependency:analyze 分析项目依赖
+
+    D:\hello-world> mvn dependency:list
+    [INFO] Scanning for projects...
+    [INFO]
+    [INFO] ------------------------------------------------------------------------
+    [INFO] Building Maven hello world project 0.0.1-SNAPSHOT
+    [INFO] ------------------------------------------------------------------------
+    [INFO]
+    [INFO] --- maven-dependency-plugin:2.8:list (default-cli) @ hello-world ---
+    [INFO]
+    [INFO] The following files have been resolved:
+    [INFO]    junit:junit:jar:4.7:test
+    [INFO]
+    [INFO] ------------------------------------------------------------------------
+    [INFO] BUILD SUCCESS
+    [INFO] ------------------------------------------------------------------------
+    [INFO] Total time: 0.713 s
+    [INFO] Finished at: 2016-05-26T16:30:09+08:00
+    [INFO] Final Memory: 12M/155M
+    [INFO] ------------------------------------------------------------------------
+
+    D:\hello-world> mvn dependency:tree
+    [INFO] Scanning for projects...
+    [INFO]
+    [INFO] ------------------------------------------------------------------------
+    [INFO] Building Maven hello world project 0.0.1-SNAPSHOT
+    [INFO] ------------------------------------------------------------------------
+    [INFO]
+    [INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ hello-world ---
+    [INFO] com.mvn:hello-world:jar:0.0.1-SNAPSHOT
+    [INFO] \- junit:junit:jar:4.7:test
+    [INFO] ------------------------------------------------------------------------
+    [INFO] BUILD SUCCESS
+    [INFO] ------------------------------------------------------------------------
+    [INFO] Total time: 0.742 s
+    [INFO] Finished at: 2016-05-26T16:26:54+08:00
+    [INFO] Final Memory: 12M/155M
+    [INFO] ------------------------------------------------------------------------
 
