@@ -436,3 +436,200 @@ A>B，B>X(可选)，B>Y(可选)，这种情况X，Y将不会对A有影响。 A�
     [INFO] Final Memory: 12M/155M
     [INFO] ------------------------------------------------------------------------
 
+
+## 第五章 仓库 ##
+### 5.1 何为maven仓库 ###
+任何一个依赖，插件或者项目构建的输出，都可以称为构件。例如依赖库log4j-1.2.15.jar是一个构件，插件maven-compiler-plugin-2.0.2.jar是一个构件，项目构建完成后的输出hello-world-1.0.0-SNAPSHOT.jar也是一个构件。
+
+maven在某个位置统一的存储所有的maven项目共享的构件，这个位置就是仓库。
+
+### 5.2 仓库的布局 ###
+根据坐标定义构件在仓库的位置。
+
+构件对应仓库的路径：groupId/artifactId/version/artifactId-version.packageing
+
+
+例如有如下jar定义：
+
+    <groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.7</version>
+    <packaging>jar</packageing>
+
+    路径： \junit\junit\4.7\junit-4.7.jar
+
+### 5.3 仓库的分类 ###
+
+- 本地仓库: 本地存储
+- 远程仓库: maven自带的默认中心仓库，包含了绝大多数开源构件。
+- 其他特殊远程仓库: 
+    - 私服(局域网内架设)
+    - Java.net Maven库(https://maven2-repository.java.net/)
+    - JBoss Maven库(http://repository.jboss.com/maven2)
+
+寻找构件的时候先在本地仓库查看，如果存在，直接使用；如果不存在，则去远程仓库查看，发现后下载到本地仓库使用，如果也不存在，则maven会报错。
+
+
+
+#### 5.3.1 本地仓库 ####
+执行第一条maven命令后才会创建本地仓库，默认会将~home\.m2\repository目录作为本地仓库。
+
+如需修改仓库路径，可以修改settings.xml文件，如果只针对当前用户修改，可以把maven安装目录下的文件拷到 .m2 文件夹下再修改。
+
+    <settings>
+    <localRepository>D:\apache-maven-3.3.9\repo</localRepository>
+    </settings>
+
+一个项目只有进入本地仓库后，才能给其他maven项目使用，那么如何进入呢：
+
+    mvn clean install   将项目的输出构件安装到本地仓库
+
+#### 5.3.2 远程仓库 ####
+其他提供构件的仓库。可以有多个。
+
+#### 5.3.3 中央仓库 ####
+maven的默认远程仓库。在maven-model-builder-3.3.9.jar中定义。
+
+    <repositories>
+      <repository>
+      <id>central</id> 
+      <name>Central Repository</name> 
+      <url>https://repo.maven.apache.org/maven2</url> 
+      <layout>default</layout> 
+      <snapshots>
+      <enabled>false</enabled> 
+      </snapshots>
+      </repository>
+    </repositories>
+
+
+并且这个pom也是其他所有pom继承的超级pom。后续会讲解。
+
+#### 5.3.4 私服 ####
+一种特殊的远程仓库，架设在局域网内，代理广域网上的远程仓库，供局域网内用户使用。
+
+maven用户会去私服下载构件，如果私服上不存在，私服会去远程仓库获取，缓存到私服，提供给用户使用。
+
+好处：
+
+- 节省带宽
+- 加速maven构建
+- 部署第三方构件
+- 稳定，可控
+- 降低中央仓库负荷
+
+### 5.4 远程仓库配置 ###
+很多情况下，默认的中央仓库无法满足要求，需要在pom中配置其他远程仓库。通过repository元素
+
+	<repositories>
+		<repository>
+			<id>jboss</id>
+			<name>JBoss Repository</name>
+			<url>http://repository.jboss.com/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+
+    releases: 设为true,表示下载发布版本
+    snapshots: 设为false，表示不下载快照版本
+
+对于releases和snapshots还有其他2个元素：
+
+- updatePolicy: 检查更新的频率，默认daily。 其他有never， always， interval:X(每隔X分钟)
+- checksumPolicy: 校验和验证，默认为warn。 其他有fail， ignore
+
+#### 5.4.1 远程仓库认证 ####
+大部分远程仓库无须认证就可以访问，有时候出于安全考虑，需要认证才可以访问。这就需在settings文件中配置。
+
+    <servers>
+    <server>
+      <id>deploymentRepo</id>
+      <username>repouser</username>
+      <password>repopwd</password>
+    </server>
+    </servers>
+
+    注：id 必须与POM中需要认证的repository的id一致。
+
+#### 5.4.2 部署至远程仓库 ####
+将项目生成的构件部署至远程仓库，供其他团队使用。
+
+配置如下：
+
+	<distributionManagement>
+		<repository>
+			<id>proj-release</id>
+			<name>proj release repository</name>
+			<url>http://192.168.1.99/content/repositories/proj-release</url>
+		</repository>
+		<snapshotRepository>
+			<id>proj-snapshots</id>
+			<name>proj snapshot repository</name>
+			<url>http://192.168.1.99/content/repositories/proj-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+    注： repository表示发布版本的仓库
+        snapshotRepository表示快照版本的仓库
+
+    执行 mvn clean deploy 命令即可。
+
+### 5.5 快照版本 ###
+maven分 发布版和快照版。
+
+- 发布版: (如1.2)即稳定版本，可以提供给外部使用
+- 快照版：(如1.2-SNAPSHOT)会不停发的更新，快照版发布时会自动加上时间戳供其他团队依赖使用。maven会自动根据时间戳的变化下载新版本到其本地，免去了手动更新的麻烦。一旦测试完善了，去掉SNAPSHOT即可变成文档版本。默认情况，maven每天检查一次更新，也可以强制检查更新： mvn clean install -U
+
+### 5.6 从仓库解析依赖的机制 ###
+
+1. 依赖范围是system的时候，直接从本地系统解析构件
+2. 根据依赖坐标算出路径后，从本地仓库查找，如果发现，则解析成功。
+3. 在本地仓库不存在的情况下，如果依赖的版本是显示的发布版本，则遍历所有远程仓库，发现后下载解析使用。
+4. 如果依赖的版本是SNAPSHOT，基于更新策略取快照的最新版本，下载解析使用。
+
+### 5.7 镜像 ###
+如果仓库X可以提供仓库Y存储的所有内容，就可以认为X是Y的一个镜像。使用镜像一般是出于地理位置考虑，比如用国内的镜像可以比国外直接提供的中央仓库下载速度更快。一般会结合私服使用。
+
+在settings.xml文件配置：
+
+    <mirrors>
+    <mirror>
+      <id>CN</id>  
+      <name>OSChina Central</name>
+      <url>http://maven.oschina.net/content/groups/public/</url>  
+      <mirrorOf>central</mirrorOf> 
+    </mirror>
+    </mirrors>
+
+    mirrorOf为central，表示该配置是中央仓库的镜像
+
+
+结合私服：
+
+    <mirrors>
+    <mirror>
+      <id>internal-repository</id>  
+      <name>internal repository manager</name>
+      <url>http://10.0.0.100/maven2</url>  
+      <mirrorOf>*</mirrorOf> 
+    </mirror>
+    </mirrors>
+
+    mirrorOf为*，表示对于所有远程仓库的请求都会转至http://10.0.0.100/maven2私服。
+
+
+### 5.8 仓库搜索服务 ###
+
+常用的一些搜索服务:
+
+- https://repository.sonatype.org/
+- http://mvnrepository.com/
+ 
+
+## 第六章 生命周期和插件 ##
