@@ -633,3 +633,258 @@ maven分 发布版和快照版。
  
 
 ## 第六章 生命周期和插件 ##
+### 6.1 何为生命周期 ###
+Maven的生命周期就是为了对所有的构建过程进行抽象和统一。而且其本身不做任何实际工作，实际任务都由插件来完成。
+
+Maven从大量项目和构建工具中学习和反思，总结了一套高度完善，易扩展的生命周期，包含清理，初始化，编译，测试，打包，集成测试，验证，部署，站点生成等几乎所有构建步骤。
+
+
+### 6.2 生命周期详解 ###
+#### 6.2.1 三套生命周期 ####
+
+- clean: 清理项目
+- default: 构建项目
+- site: 建立项目站点
+
+三套生命周期相互独立。
+
+每个生命周期包含一些阶段，这些阶段是有顺序的，后面的阶段依赖前面的。以clean为例，它包含pre-clean,clean和post-clean。当用户调用pre-clean时，只有pre-clean阶段执行；当用户调用clean时，pre-clean和clean阶段都会执行；当用户调用post-clean时，三个阶段都会执行。
+
+#### 6.2.2 clean生命周期 ####
+1. pre-clean: 执行一些清理前需要完成的工作
+2. clean: 清理上一次构建生成的文件
+3. post-clean: 执行一些清理后需要完成的工作
+
+#### 6.2.3 default生命周期 ####
+核心部分。讲解部分重要的阶段。
+
+1. validate
+2. initialize
+3. generate-sources
+4. process-sources: 处理项目主资源文件，一般是将src/main/resources目录下的内容处理后复制到classpath目录
+5. generate-resources
+6. process-resources
+7. compile: 编译项目主源码，编译src/main/java下的java文件到classpath目录
+8. process-classes
+9. generate-test-sources
+10. process-test-sources: 处理项目测试资源文件，
+11. generate-test-resources
+12. process-test-resources
+13. test-compile: 编译项目的测试代码，编译src/test/java下的java文件到classpath目录
+14. process-test-classes
+15. test: 使用单元测试框架运行测试，测试代码不会打包和部署
+16. prepare-package
+17. package: 打包，如jar等
+18. pre-integration-test
+19. integration-test
+20. post-integration-test
+21. verify
+22. install: 将包安装到maven本地仓库，供其他项目使用
+23. deploy: 将最终包发布到远程仓库
+
+#### 6.2.4 site生命周期 ####
+
+1. pre-site: 执行一些在生成项目站点之前需要完成的工作
+2. site: 生成项目站点文档
+3. post-site: 行一些在生成项目站点之后需要完成的工作
+4. site-deploy: 将生成的项目站点发布到服务器
+
+#### 6.2.5 命令行与生命周期 ####
+maven会自动执行命令所属阶段之前的所有阶段。
+
+    mvn clean: 执行pre-clean和clean
+    mvn test: 执行validate到test的所有阶段
+    mvn clean install: 执行pre-clean和clean， 再执行validate到install的所有阶段
+
+#### 6.3 插件目标  ####
+插件目标(plugin goal):对于插件本身，为了复用代码，一个插件往往提供多个任务。每一个功能就是一个插件目标。
+
+比如 dependency:analyze, dependency:tree 和 dependency:list等。
+
+冒号前面的是插件前缀，后面的是插件的目标。
+
+#### 6.4 插件绑定 ####
+比如 compile 阶段与 maven-compiler-plugin 这一插件绑定，用来提供编译功能。
+
+#### 6.4.1 内置绑定 ####
+为了让用户几乎不用配置就能构建maven项目，maven核心为一些主要生命周期绑定了很多插件。
+
+- clean: 绑定maven-clean-plugin插件
+
+        pre-clean: -
+        clean: maven-clean-plugin:clean
+        post-clean: -
+
+- site: 绑定maven-site-plugin插件
+
+        pre-site: -
+        site: maven-site-plugin:clean
+        post-site: -
+        site-deploy: maven-site-plugin:deploy
+
+- default: 绑定 maven-resources-plugin, maven-compiler-plugin等
+
+        compile: maven-compiler-plugin:compile
+        test: maven-surefire-plugin:test
+        jar: maven-jar-plugin:jar
+        等...
+
+#### 6.4.2 自定义绑定 ####
+下面的配置: 在defau生命周期的verify阶段执行maven-soure-plugin插件的jar-no-fork任务，创建源码jar包。创建一个以-sources.jar结尾的源码jar包。一般插件也会配置一个默认阶段，如果 phase 不设置，就用插件的默认阶段。
+
+    <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-soure-plugin</artifactId>
+        <version>2.1.1</version>
+		<executions>
+	      <execution>
+	      	 <id>attach-sources</id>
+			 <phase>verify</phase>
+			 <goals>
+				<goal>jar-no-fork</goal>
+			 </goals>
+			</execution>
+        </executions>
+	  </plugin>
+    </plugins>
+    </build>
+
+    execution: 配合执行任务
+    phase: 绑定阶段
+    goal: 插件目标
+
+如果多个插件绑定到同一个阶段，则按插件声明顺序执行。
+
+### 6.5 插件配置 ###
+可以进一步配置插件目标的参数。
+
+#### 6.5.1 命令行插件配置 ####
+在命令行模式下，使用-D参数，后面加key=value的形式。
+
+例如: maven-surefire-plugin提供了一个 maven.test.skip参数，当其值为true的时候，跳过执行测试。
+
+    mvn install -D maven.test.skip=true
+
+参数-D是java自带的，通过命令行设置一个java系统属性。maven简单的重用了这个参数。
+
+#### 6.5.2 POM中插件全局配置 ####
+声明插件的时候全局配置，对各个阶段都有效。
+
+    <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.1</version>
+		<configuration>
+			<source>1.6</source>
+			<target>1.6</target>
+		</configuration>
+	  </plugin>
+    </plugins>
+    </build>
+
+#### 6.5.3 POM中插件任务配置 ####
+除了可以为插件配置全局参数，还可以为某个插件任务配置特定参数。
+
+在 execution 中配置configuration。
+
+    <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.3</version>
+		<executions>
+	      <execution>
+	      	 <id>ant-validate</id>
+			 <phase>validate</phase>
+			 <goals>
+				<goal>run</goal>
+			 </goals>
+			 <configuration>
+				<tasks>
+					<echo>I'm bound to validate phase!</echo>
+				</tasks>
+			 </configuration>
+			</execution>
+			<execution>
+	      	 <id>ant-verify</id>
+			 <phase>verify</phase>
+			 <goals>
+				<goal>run</goal>
+			 </goals>
+			 <configuration>
+				<tasks>
+					<echo>I'm bound to verify phase!</echo>
+				</tasks>
+			 </configuration>
+			</execution>
+        </executions>
+	  </plugin>
+    </plugins>
+    </build>
+
+### 6.6 获取插件信息 ###
+#### 6.6.1 在线插件信息 ####
+
+- http://maven.apache.org/plugins/index.html
+
+#### 6.6.2 使用maven-help-plugin描述插件 ####
+
+    mvn help:describe -D plugin=compiler
+
+### 6.7 从命令行调用插件 ###
+    mvn 目标前缀:目标
+
+    mvn dependency:tree
+
+### 6.8 插件解析机制 ###
+#### 6.8.1 插件仓库 ####
+跟普通的构件依赖类似，先从本地仓库查找，没有的话去远程仓库下载到本地仓库使用。
+
+插件的配置方式与普通构件也一样，只是标签名字不同。用pluginRepositories和pluginRepository来声明。
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>central</id>
+			<name>Maven Plugin Repository</name>
+			<url>http://repo1.maven.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+		</pluginRepository>
+	</pluginRepositories>
+
+#### 6.8.2 插件的默认 groupId ####
+如果插件是maven的官方插件，可以省略groupId，解析时自动用 org.apache.maven.plugins补齐，一般不推荐用。
+
+#### 6.8.3 解析插件版本 ####
+如果插件没有指明版本，则maven会去超级POM中查询对应的版本，如果有，则使用；如果没有，则在本地库里查询最新 release 版本使用。
+
+#### 6.8.4 解析插件前缀 ####
+在插件的元数据(maven-metadata.xml)中定义。
+
+    <metadata>
+      <plugins>
+        <plugin>
+          <name>Maven Clean Plugin</name>
+          <prefix>clean</prefix>
+          <artifactId>maven-clean-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <name>Maven compiler Plugin</name>
+          <prefix>compiler</prefix>
+          <artifactId>maven-compiler-plugin</artifactId>
+        </plugin>
+      </plugins>
+    </metadata>
+
+
+
+## 第七章 聚合与继承 ##
