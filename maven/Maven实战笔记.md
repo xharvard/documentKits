@@ -886,5 +886,210 @@ maven会自动执行命令所属阶段之前的所有阶段。
     </metadata>
 
 
-
 ## 第七章 聚合与继承 ##
+### 7.1 聚合 ###
+将多个模块构建成一个项目。通过module声明。主POM的packaging必须声明为pom。
+
+	<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	  <modelVersion>4.0.0</modelVersion>
+	  <groupId>com.mvn</groupId>
+	  <artifactId>hello-world</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	  <packaging>pom</packaging>
+	  <name>Maven hello world project</name>
+	  <module>hello-base</module>
+	  <module>hello-system</module>
+	</project>
+
+目录结构
+	
+	hello-world
+		|--hello-base
+		|	|-- src
+		|	|-- pom.xml
+		|--hello-system
+		|	|-- src
+		|	|-- pom.xml
+		|-- pom.xml
+
+### 7.2 继承 ###
+多个module之间会有相同的库或者插件定义,抽取重复的配置,就是 pom 的继承。
+
+可以创建POM的父子结构,在父POM中声明一些配置供子POM继承。
+
+以7.1为基础,创建hello-parent子目录,在其下创建父POM。
+
+	<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	  <modelVersion>4.0.0</modelVersion>
+	  <groupId>com.mvn</groupId>
+	  <artifactId>hello-parent</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	  <packaging>pom</packaging>
+	  <name>Maven hello world parent</name>
+	</project>
+
+修改hello-base模块:
+
+	<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	  <modelVersion>4.0.0</modelVersion>
+	  <parent>
+		<groupId>com.mvn</groupId>
+	    <artifactId>hello-parent</artifactId>
+	    <version>0.0.1-SNAPSHOT</version>
+		<relativePath>../hello-parent/pom.xml</relativePath>
+	  </parent>
+	  <artifactId>hello-base</artifactId>
+	  <name>Maven hello base</name>
+	</project>
+
+	注: mavne 默认识别的 relativePath 是其上一层目录
+
+修改hello-system模块: 同上
+
+最后修改hello-world主POM:
+
+	<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	  <modelVersion>4.0.0</modelVersion>
+	  <groupId>com.mvn</groupId>
+	  <artifactId>hello-world</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	  <packaging>pom</packaging>
+	  <name>Maven hello world project</name>
+	  <module>hello-parent</module>
+	  <module>hello-base</module>
+	  <module>hello-system</module>
+	</project>
+
+
+有很多可继承的元素: groupId, version, url, dependencies 等
+
+### 7.3 依赖的继承 ###
+Maven提供了dependencyManagement元素来让子模块继承父模块的依赖配置。在其元素下的依赖声明不会引入实际的依赖,仅仅约束dependencies下的依赖使用。
+
+    <project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	     http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.xharvard</groupId>
+	<artifactId>hello-world</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>hello-world</name>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<springframework.version>2.5.6</springframework.version>
+		<junit.version>4.7</junit.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+    </project>
+
+	dependencyManagement只是声明, 不会真的引入。
+
+对应的子模块可以选择性的引入需要的依赖即可。
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
+	注: 不需要写 version 属性了, 自动应用父POM定义的版本。
+
+
+### 7.4 插件管理 ###
+类似的, maven提供pluginManagement元素用来声明插件。
+
+### 7.5 聚合与继承的关系 ###
+
+- 聚合: 方便快速构建项目
+- 继承: 消除重复配置
+
+通常情况, 会将两者配置在同一个POM中。既是父POM, 又是提供聚合的父模块。
+
+### 7.6 约定优于配置 ###
+mavne的核心理念。
+
+例如: maven定义的一些约定如下, 具体可以查看超级POM.xml文件的定义。
+
+- 源码: src/main/java/
+- 编译输出: target/classes/
+- 打包方式: jar
+- 包输出目录: target/
+
+当然, 这些约定也是可以修改的, 但是不推荐。 容易给其他开发者带来混乱。
+
+	例如修改源码路径:
+	<build>
+		<sourceDirectory>src/java</sourceDirectory>
+	</build>
+
+### 7.7 反应堆 ###
+在一个多模块的项目中, 反应堆是指所有模块组成的一个构建结构。反应堆包含了个模块之间的继承和依赖关系, 从而能够自动计算出合理的模块构建顺序。
+
+#### 7.7.1 反应堆的构建顺序 ####
+maven读取POM, 如果该POM没有依赖模块, 那么就构建该模块; 否则就先构建其依赖模块, 如果该依赖还依赖于其他模块, 则进一步先构建依赖的依赖模块。
+
+模块间的依赖关系将反应堆构成一个有向非循环图(DGA), 如果出现循环, maven会报错。
+
+#### 7.7.2 剪裁反应堆 ####
+构建反应堆中的某些模块。
+
+maven提供了很多命令支持: (mvn -h 查看参数)
+
+	-am, --also-make 同时构建所以模块的依赖模块
+	-amd -also-make-dependents 同时构建依赖于所列模块的模块
+	-pl, --projects <arg> 构建指定的模块, 模块间用逗号分隔
+	-rf -resume-from <arg> 从指定模块回复反应堆
+
+	mvn clean install -pl hello-base
+	mvn clean install -rf hello-system
+
+## 第八章 使用Nexus创建私服 ##
+
+
+
