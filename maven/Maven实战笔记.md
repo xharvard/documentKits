@@ -1090,6 +1090,58 @@ maven提供了很多命令支持: (mvn -h 查看参数)
 	mvn clean install -rf hello-system
 
 ## 第八章 使用Nexus创建私服 ##
+私服是maven的特殊仓库。
+主流搭建软件:
 
+- apache的 Archiva
+- JFrog的 Artifactory
+- Sonatype的 Nexue (主流)
 
+### 8.1 Nexue简介 ###
+Nexue分开源版和专业版。基本开源版就够我们使用了。
+
+### 8.2 安装Nexue ###
+Nexue是典型的Jave Web应用。有两种安装包,一种是包含Jetty容器的Bundle包, 另一种是不包含容器的war包。
+
+#### 8.2.1 下载 ####
+[http://www.sonatype.org/nexus/downloads/](http://www.sonatype.org/nexus/downloads/ "http://www.sonatype.org/nexus/downloads/")
+
+下载开源版本(nexus-2.13.0-01-bundle.zip), 3.0的目前还不太确定怎么安装。
+
+#### 8.2.2 Bundle方式安装 ####
+解压zip文件, 进入\nexus-2.13.0-01-bundle\nexus-2.13.0-01\bin目录, 执行 nexus console 命令开启服务。
+
+在浏览器输入http://localhost:8081/nexus/ 即可登录系统。
+
+默认管理员用户名/密码: admin/admin123
+
+nexus其他一些参数说明
+
+	- console 命令行方式启动
+	- install 安装windows服务
+	- start 启动服务
+	- stop 停止服务
+	- restart 重启服务
+	- uninstall 取消windows服务
+
+修改默认端口号:
+
+	\nexus-2.13.0-01-bundle\nexus-2.13.0-01\conf\nexus.properties下的application-port 属性
+
+### 8.3 Nexus的仓库与仓库组 ###
+包括代理仓库, 宿主仓库, 仓库组。
+
+#### 8.3.1 Nexus 内置的仓库 ####
+点击Nexus界面左边导航栏的Repositories链接。可以看到各种仓库信息。
+
+仓库有四种类型
+
+- group 仓库组
+- hosted 宿主
+- proxy 代理
+- virtual 虚拟
+
+其他后续操作以后用到的话再补齐。
+
+## 第九章 使用Maven进行测试 ##
 
