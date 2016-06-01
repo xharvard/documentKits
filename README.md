@@ -6,5 +6,5 @@
     |--maven
     |    `--maven.md
     |    `--Maven实战笔记.md
-    |--git
-    |    `--git.md
+    |--python
+    |    `--python基础教程.md
