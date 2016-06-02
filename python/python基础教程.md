@@ -54,5 +54,27 @@ python有6种内建序列
     >>> greeting[0]
     'h'
 
+#### 2.1.2 分片 ####
+访问一定范围内的元素，通过冒号隔开2个索引。(前面的索引包含，后面的索引不包含)
+
+    >>> tag = '<a href="http://www.python.org">Python web site</a>'
+    >>> tag[9:30]
+    'http://www.python.org'
+    >>> tag[32:-4]
+    'python web site'
+
+    快捷操作:
+    >>> num = [1, 2, 3, 4]
+    >>> num[-3:-1]
+    [2, 3]
+    >>> num[-3:]
+    [2, 3, 4]
+    >>> num[:3]
+    [1, 2, 3]
+    >>> num[:]
+    [1, 2, 3, 4]
+
+
+
 
 
