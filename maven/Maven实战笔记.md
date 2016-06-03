@@ -1264,7 +1264,7 @@ TestNG： Test Next Generation
 后就会生成相应的测试jar包了。
 
 
-## 10 使用 Hudson 进行持续集成 ##
+## 第十章 使用 Hudson 进行持续集成 ##
 持续集成: Continuous Integration
 
 官网: [http://hudson-ci.org/](http://hudson-ci.org/)
@@ -1274,7 +1274,7 @@ TestNG： Test Next Generation
 Hudson是Jenkins的前身，现在主流应该是Jenkins。
 
 
-## 11 使用Maven构建 Web 应用 ##
+## 第十一章 使用Maven构建 Web 应用 ##
 必须显示指定 packaging 为 war。
 
 代码结构约定: 跟jar类型一致，多一个 src/main/webapp/ 目录存放web相关的东西。
@@ -1319,7 +1319,14 @@ Hudson是Jenkins的前身，现在主流应该是Jenkins。
 参考: [http://blog.csdn.net/steveguoshao/article/details/38469713](http://blog.csdn.net/steveguoshao/article/details/38469713)
 
 
-## 12 版本管理 ##
+## 第十二章 版本管理 ##
+Maven版本约定: <主版本>.<次版本>.<增量版本>-<里程碑版本>。 如 1.3.4-beta-2
+
+maven-release-plugin插件:自动发布插件
+
+GPG: gnuPG。为文件生成签名，管理秘钥，验证签名等。Maven也提供了插件: maven-gpg-plugin
+
+参考: [https://www.gnupg.org/](https://www.gnupg.org/)
 
 
-
+## 第十三章 灵活的构建 ##
