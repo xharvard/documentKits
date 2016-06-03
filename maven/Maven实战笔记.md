@@ -1,6 +1,7 @@
 # Maven实战 #
 
 作成日： 2016/5/25
+更新日： 2016/6/3
 
 参考网站：[http://maven.apache.org/](http://maven.apache.org/)
 
@@ -1264,15 +1265,61 @@ TestNG： Test Next Generation
 
 
 ## 10 使用 Hudson 进行持续集成 ##
+持续集成: Continuous Integration
+
+官网: [http://hudson-ci.org/](http://hudson-ci.org/)
+
+[https://jenkins.io/index.html](https://jenkins.io/index.html)
+
+Hudson是Jenkins的前身，现在主流应该是Jenkins。
 
 
+## 11 使用Maven构建 Web 应用 ##
+必须显示指定 packaging 为 war。
+
+代码结构约定: 跟jar类型一致，多一个 src/main/webapp/ 目录存放web相关的东西。
 
 
+### 使用 jetty-maven-plugin 进行测试 ###
+
+	<plugin>
+	  	<groupId>org.mortbay.jetty</groupId>
+	  	<artifactId>jetty-maven-plugin</artifactId>
+	  	<version>8.1.16.v20140903</version>
+	  	<configuration>
+	  		<scanIntervalSeconds>10</scanIntervalSeconds>
+	  		<webAppConfig>
+	  			<contextPath>/hello-world</contextPath>
+	  		</webAppConfig>
+	  	</configuration>
+	</plugin>
+
+这样就可以通过 http://localhost:port/hello-world/ 访问应用了。
+
+默认情况下，只有org.apache.maven.plugins 和 org.codehaus.mojo 两个groupId下的插件支持简化命令。
+
+所有得在settings.xml中配置:
+
+    <pluginGroups>
+        <pluginGroup>org.mortbay.jetty</pluginGroup>
+    </pluginGroups>
+
+现在可以运行如下命令启动jetty-maven-plugin
+
+    mvn jetty:run
+
+这样就启动了jetty服务器，默认监听8080端口。如果希望使用其他端口:
+
+    mvn jetty:run -Djetty.prot=9999
 
 
+### 使用Cargo实现自动化部署 ###
+通过cargo-maven2-plugin实现，具体就不写了。
+
+参考: [http://blog.csdn.net/steveguoshao/article/details/38469713](http://blog.csdn.net/steveguoshao/article/details/38469713)
 
 
-
+## 12 版本管理 ##
 
 
 
