@@ -1144,4 +1144,135 @@ nexus其他一些参数说明
 其他后续操作以后用到的话再补齐。
 
 ## 第九章 使用Maven进行测试 ##
+通过maven-surefire-plugin与主流junit3, junit4, TestNG集成。完成测试和报告生成。
+
+### 9.1 maven-surefire-plugin 简介 ###
+与test目标绑定，属于内置绑定。
+
+默认情况下，test目标会自动执行测试源码路径下所有符合命名模式的类:
+
+- ** /Test *.java
+- ** /* Test.java
+- ** /* TestCase.java
+
+### 9.2 跳过测试 ###
+
+#### 跳过测试执行 ####
+
+    命令行方式:(skipTests)
+    mvn package -DskipTests
+    
+    POM中配置:(skipTests标签)
+    <plugin>
+	  	<groupId>org.apache.maven.plugins</groupId>
+	  	<artifactId>maven-surefire-plugin</artifactId>
+	  	<version>2.5</version>
+	  	<configuration>
+	  		<skipTests>true</skipTests>
+	  	</configuration>
+	</plugin>
+
+#### 跳过测试代码编译 ####
+
+    mvn package -Dmaven.test.skip=true
+
+    <plugin>
+    <configuration>
+        <skip>true</skip>
+    </configuration>
+    </plugin>
+
+### 9.3 动态指定要运行的测试用例 ###
+
+    mvn test -Dtest=XXXTest
+    mvn test -Dtest=vm*Test (* 号表示0个或多个)
+    mvn test -Dtest=AaaTest,BbbTest,CccTest
+
+### 9.4 包含和排除测试用例 ###
+- includes 包含
+- excludes 排除
+
+        <plugin>
+    	  	<groupId>org.apache.maven.plugins</groupId>
+    	  	<artifactId>maven-surefire-plugin</artifactId>
+    	  	<version>2.5</version>
+    	  	<configuration>
+    	  		<includes>
+    	  			<include>**/*Tests.java</include>
+    	  		</includes>
+    	  		<excludes>
+    	  			<exclude>**/*ServiceTest.java</exclude>
+    	  			<exclude>**/TempDaoTest.java</exclude>
+    	  		</excludes>
+    	  	</configuration>
+    	  </plugin>
+
+### 9.5 测试报告 ###
+#### 基本测试报告 ####
+默认情况下，会在项目的 target/surefire-reports目录下生成2种格式的错误报告
+
+- 简单文本格式
+- 与Junit兼容的XML格式
+
+#### 测试覆盖率报告 ####
+Cobertura是一个优秀的开源测试覆盖率统计工具，Maven通过cobertura-maven-plugin与之集成。可以使用简单的命令生成报告:
+
+
+    mvn cobertura:cobertura
+
+生成报告的位置: target/site/cobertura
+
+参考: [http://cobertura.github.io/cobertura/](http://cobertura.github.io/cobertura/)
+
+### 9.6 运行TestNG测试 ###
+TestNG： Test Next Generation
+
+	<dependency>
+	  <groupId>org.testng</groupId>
+	  <artifactId>testng</artifactId>
+	  <version>5.9</version>
+	  <scope>test</scope>
+	  <classifier>jdk15</classifier>
+	</dependency>
+
+参考: [http://testng.org/doc/index.html](http://testng.org/doc/index.html)
+
+### 9.7 重用测试代码 ###
+可以将测试代码打包，供其他项目参考使用。
+
+需要使用maven-jar-plugin插件，其有2个目标，分别是jar和test-jar。前者已经内置绑定到default生命周期的package阶段运行。
+后者需我们手动配置。
+
+	  <plugin>
+	  	<groupId>org.apache.maven.plugins</groupId>
+	  	<artifactId>maven-jar-plugin</artifactId>
+	  	<version>2.5</version>
+	  	<executions>
+	  		<execution>
+	  			<goals>
+	  				<goal>test-jar</goal>
+	  			</goals>
+	  		</execution>
+	  	</executions>
+	  </plugin>
+
+然后执行
+
+    mvn clean package
+
+后就会生成相应的测试jar包了。
+
+
+## 10 使用 Hudson 进行持续集成 ##
+
+
+
+
+
+
+
+
+
+
+
 
