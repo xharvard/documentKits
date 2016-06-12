@@ -1330,3 +1330,32 @@ GPG: gnuPG。为文件生成签名，管理秘钥，验证签名等。Maven也�
 
 
 ## 第十三章 灵活的构建 ##
+### 13.1 Maven属性  ###
+通过 properties 标签定义属性， 其他地方可以通过 ${xxx}引用属性。
+
+    <properties>
+        <version>1.1.1</version>
+        <my.prop>hello</my.prop>
+    </properties>
+
+6类maven属性:
+
+1. 内置属性: 主要有两个常用的内置属性
+    - ${basedir} 表示项目根目录，即包含pom.xml文件的目录。
+    - ${version} 表示项目版本
+2. POM属性:引用POM文件中对应元素的值。
+    - ${project.build.sourceDirectory} 项目的主源码目录， 默认为src/main/java/
+    - ${project.outputDirectory} 项目的输出目录， 默认为 target/
+    - ${project.groupId} 项目的groupId
+    - ${project.build.finalName} 项目打包输出名称， 默认为 ${project.artifactId}-${project.version}
+3. 自定义属性:  \<properties>属性定义
+4. Settings属性: 与POM属性同理。使用settings. 开头引用settings.xml中的元素的值。
+    - ${settings.localRepository} 用户本地仓库地址
+5. Java系统属性: 可以使用 mvn help:system 查看所有java系统属性
+    - ${user.home} 用户目录
+6. 环境变量属性:使用env.开头的maven属性引用。
+    - ${env.JAVA_HOME} JAVA_HOME环境变量
+
+### 13.2 资源过滤 ###
+
+
