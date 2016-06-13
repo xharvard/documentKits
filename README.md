@@ -89,8 +89,12 @@ Jenkins是基于Java开发的一种持续集成工具，用于监控持续重复
 
 
 
+## 计划 ##
+1. AMQP协议 - rabbitMQ
+2. mysql
 
-## 下面是提供的一些参考学习文档 ##
+
+## 笔记 ##
 
     documentKits
     |    `--README.md
