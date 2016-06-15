@@ -103,3 +103,11 @@ Jenkins是基于Java开发的一种持续集成工具，用于监控持续重复
     |    `--Maven实战笔记.md
     |--python
     |    `--python基础教程.md
+    |--win_cmd
+    |    `--win_cmd.md
+    |--linux
+    |    `--linux.md
+
+## 技术点列表 ##
+- 创建大文件 -> win_cmd/win_cmd.md
+- FTP -> linux/linux.md
