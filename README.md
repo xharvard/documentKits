@@ -30,7 +30,22 @@ Maven项目对象模型(POM)，可以通过一小段描述信息来管理项目�
 
 官网: [http://maven.apache.org/](http://maven.apache.org/ "http://maven.apache.org/")
 
+## 版本控制 ##
+### Git(开源) ###
+分布式版本控制软件。
+
+官网: [https://git-scm.com](https://git-scm.com)
+
 ## 编程语言 ##
+### HTML & CSS & JAVASCRIPT ###
+HTML 指超文本标签语言。HTML 是通向 WEB 技术世界的钥匙。
+
+CSS 用于控制网页的样式和布局。
+
+JavaScript 是世界上最流行的脚本语言。
+
+参考:[http://www.w3school.com.cn/](http://www.w3school.com.cn/)
+
 ###  python (开源) ###
 Python（英国发音：/ˈpaɪθən/ 美国发音：/ˈpaɪθɑːn/）, 是一种面向对象、解释型计算机程序设计语言，由Guido van Rossum于1989年发明，第一个公开发行版发行于1991年。
 Python是纯粹的自由软件， 源代码和解释器CPython遵循 GPL(GNU General Public License)协议。

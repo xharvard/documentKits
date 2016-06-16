@@ -1,7 +1,7 @@
 # Maven实战 #
 
 作成日： 2016/5/25
-更新日： 2016/6/3
+更新日： 2016/6/16
 
 参考网站：[http://maven.apache.org/](http://maven.apache.org/)
 
@@ -1357,5 +1357,134 @@ GPG: gnuPG。为文件生成签名，管理秘钥，验证签名等。Maven也�
     - ${env.JAVA_HOME} JAVA_HOME环境变量
 
 ### 13.2 资源过滤 ###
+将变化的部分提取出来
+
+    database.jdbc.driverClass = ${db.driver}
+    database.jdbc.connectionURL = ${db.url}
+    database.jdbc.username = ${db.username}
+    database.jdbc.password = ${db.passowrd}
+
+可以使用 profile 将上述变量包装起来
+
+ 	<profiles>
+ 		<profile>
+ 			<id>dev</id>
+ 			<properties>
+ 				<db.driver>com.mysql.jdbc.Driver</db.driver>
+ 				<db.url>jdbc:mysql://localhost:3306/test</db.url>
+ 				<db.username>dev</db.username>
+ 				<db.password>password</db.password>
+ 			</properties>
+ 		</profile>
+ 	</profiles>
+
+最后需要maven的插件来解析配置文件的 ${XXX}。 maven-resources-plugin插件。如果是web的话，用maven-web-plugins插件。
 
 
+执行命令：
+    
+    mvn clean install -P dev
+
+### 13.3 profile ###
+#### 13.3.1 针对不同环境配置不同的profile ####
+
+ 	<profiles>
+ 		<profile>
+ 			<id>dev</id>
+ 			<properties>
+ 				<db.driver>com.mysql.jdbc.Driver</db.driver>
+ 				<db.url>jdbc:mysql://localhost:3306/dev</db.url>
+ 				<db.username>dev</db.username>
+ 				<db.password>password</db.password>
+ 			</properties>
+ 		</profile>
+ 		<profile>
+ 			<id>test</id>
+ 			<properties>
+ 				<db.driver>com.mysql.jdbc.Driver</db.driver>
+ 				<db.url>jdbc:mysql://10.10.10.10:3306/test</db.url>
+ 				<db.username>test</db.username>
+ 				<db.password>password</db.password>
+ 			</properties>
+ 		</profile>
+ 	</profiles>
+
+#### 13.3.2 激活profile ####
+1. 命令行方式(同时激活多个的话用,隔开)
+
+    mvn clean install -P dev,test
+
+2. settings文件激活
+
+    设置后将一直处于激活状态
+    
+        <settings>
+          <activeProfiles>
+            <activeProfile>dev</activeProfile>
+          </activeProfiles>
+        </settings>
+
+3. 系统属性激活
+    配置属性的时候自动激活。
+    
+     	<profiles>
+ 		<profile>
+ 			<activation>
+ 				<property>
+ 					<name>test</name>
+ 				</property>
+ 			</activation>
+ 		</profile>
+ 	    </profiles>
+    
+4. 操作系统环境激活
+    
+     	<profiles>
+ 		<profile>
+ 			<activation>
+ 				<os>
+ 					<name>Windwos XP</name>
+ 					<family>Windows</family>
+ 					<arch>x86</arch>
+ 					<version>5.1.2600</version>
+ 				</os>
+ 			</activation>
+ 		</profile>
+ 	    </profiles>
+
+5. 文件存在与否激活
+
+     	<profiles>
+ 		<profile>
+ 			<activation>
+ 				<file>
+ 					<missing>x.properties</missing>
+ 					<exists>y.properties</exists>
+ 				</file>
+ 			</activation>
+ 		</profile>
+ 	    </profiles>
+
+6. 默认激活
+
+     	<profiles>
+ 		<profile>
+ 			<activation>
+ 				<activeByDefault>true</activeByDefault>
+ 			</activation>
+ 		</profile>
+ 	    </profiles>
+
+查看profiles
+
+    mvn help:all-profiles
+    mvn help:active-profiles
+
+#### 13.3.3 profile种类 ####
+1. pom.xml
+2. 用户settings.xml
+3. 全局settings.xml
+4. profiles.xml(maven2 支持)
+
+
+其他章节不是很重要，暂时忽略。
