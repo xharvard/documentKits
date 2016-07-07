@@ -43,4 +43,7 @@ git diff --cached： 高版本可以使用 --staged。 比较暂存区的文件�
     warning: LF will be replaced by CRLF in demo.txt.
     The file will have its original line endings in your working directory.
 
-## Q2:  ##
+## Q2: 跟踪远程分支 ##
+
+
+## Q3： 合并与变基 ##

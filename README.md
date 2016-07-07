@@ -1,7 +1,7 @@
 # 软件工程相关产品及技术 #
 作成日: 2016/6/2
 
-更新日: 2016/6/3
+更新日: 2016/6/29
 
 ## 项目管理 ##
 ### Atlassian公司产品 ###
@@ -89,6 +89,13 @@ PyCharm是一种Python IDE，带有一整套可以帮助用户在使用Python语
 官网: [https://www.jetbrains.com/pycharm/](https://www.jetbrains.com/pycharm/)
 
 
+### Atom(开源免费) ###
+由 GitHub 打造的更为先进的编辑器。
+
+Atom 代码编辑器支持 Windows、Mac、Linux 三大桌面平台，完全免费，并且已经在 GitHub 上开放了全部的源代码。
+
+官网： [https://atom.io/](https://atom.io/)
+中文社区: [https://atom-china.org/](https://atom-china.org/)
 
 
 ## 持续集成(CI) ##
@@ -102,7 +109,12 @@ Jenkins是基于Java开发的一种持续集成工具，用于监控持续重复
 
 官网: [https://jenkins.io/index.html](https://jenkins.io/index.html)
 
+## 接口管理工具 ##
+### RAP ###
+RAP是一个可视化接口管理工具 通过分析接口结构，动态生成模拟数据，校验真实接口正确性， 围绕接口定义，通过一系列自动化工具提升我们的协作效率。属于阿里巴巴产品。
 
+官网： [http://rap.taobao.org/org/index.do](http://rap.taobao.org/org/index.do)
+github: [https://github.com/thx/RAP](https://github.com/thx/RAP)
 
 ## 计划 ##
 1. AMQP协议 - rabbitMQ
